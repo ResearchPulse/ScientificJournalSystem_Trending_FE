@@ -14,21 +14,10 @@ const TopJournalRankingCard = ({ data, loading, error, onRetry }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const actionLink = (
-    <button 
-      className="tjr-action-link"
-      onClick={() => console.log('View Full Table clicked')}
-      aria-label={t('journals.viewFullTable', 'VIEW FULL TABLE')}
-    >
-      {t('journals.viewFullTable', 'VIEW FULL TABLE')}
-    </button>
-  );
-
   return (
     <Card 
       title={t('journals.topJournalRanking', 'Top Journal Ranking')} 
       subtitle={t('journals.performanceByWeighted', 'Performance by Weighted Impact Factor')} 
-      actions={actionLink}
       className="tjr-card"
     >
       {loading ? (

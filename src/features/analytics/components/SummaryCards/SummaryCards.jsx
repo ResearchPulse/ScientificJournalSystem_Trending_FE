@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Card from '../../../../shared/components/common/Card';
-import { MdTrendingUp, MdAutorenew, MdFlashOn } from 'react-icons/md';
+import { MdTrendingUp, MdFlashOn } from 'react-icons/md';
 import styles from '../../styles/Analytics.module.css';
 
 /**
@@ -54,7 +54,6 @@ export const SummaryCards = ({ summary = {} }) => {
       <Card className={styles.summaryCard}>
         <div className={styles.summaryCardHeader}>
           <span>{t('analytics.trackingUsage', 'Tracking Usage')}</span>
-          <MdAutorenew size={20} color="var(--color-neutral-500, #666666)" />
         </div>
         <div className={styles.progressBarBg}>
           <div className={styles.progressBarFill} style={{ width: `${usagePercentage}%` }}></div>

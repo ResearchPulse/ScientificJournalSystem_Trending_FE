@@ -17,6 +17,7 @@ import './Header.css';
 const AppHeader = ({
   sticky = true,
   onSearch,
+  notificationCount,
 }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -109,7 +110,7 @@ const AppHeader = ({
             icon={FiBell} 
             onClick={() => console.log('notifications clicked')} 
             ariaLabel={t('header.notifications')} 
-            badge={3}
+            badge={notificationCount}
           />
           <LanguageSelector />
           <IconButton 

@@ -19,27 +19,10 @@ const chatbotApi = {
   sendMessage: async ({ projectId, project_id, message }) => {
     const resolvedProjectId = project_id ?? projectId;
 
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-
-    const response = await fetch(CHATBOT_API_URL, {
-      method: 'POST',
-      credentials: 'include',
-      headers,
-      body: JSON.stringify({
-        project_id: Number(resolvedProjectId),
-        message,
-      }),
+    return await apiClient.post(CHATBOT_API_URL, {
+      project_id: Number(resolvedProjectId),
+      message,
     });
-
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      throw new Error(data?.message || `Chatbot API error: ${response.status}`);
-    }
-
-    return data;
   },
 
   /**

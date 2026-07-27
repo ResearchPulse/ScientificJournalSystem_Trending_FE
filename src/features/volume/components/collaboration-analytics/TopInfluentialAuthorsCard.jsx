@@ -85,7 +85,6 @@ const TopInfluentialAuthorsCard = ({ data }) => {
               <FiBarChart2 />
             </button>
           </div>
-          <span className="ca-card-action">{t('volume.viewAll', 'VIEW ALL')}</span>
         </div>
       </div>
 

@@ -6,8 +6,7 @@ export const headerConfig = {
     {
       id: "notifications",
       icon: FiBell,
-      ariaLabel: "Notifications",
-      badge: 3
+      ariaLabel: "Notifications"
     },
     {
       id: "settings",
