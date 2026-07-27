@@ -4,10 +4,12 @@
  * File: shared/components/chatbot/ChatbotWidget.jsx
  */
 import React, { useRef, useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import { FaPaperPlane } from 'react-icons/fa';
+import { FaPaperPlane, FaExpand } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import chatbotApi from '../../services/chatbotApi';
 import './ChatbotWidget.css';
@@ -56,24 +58,39 @@ function mapHistoryMessage(item) {
   };
 }
 
-function renderMarkdownLite(text) {
-  if (!text) return null;
-
-  return text.split('\n').map((line, lineIndex) => {
-    const fragments = line.split(/(\*\*.*?\*\*)/g).map((part, partIndex) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={`${lineIndex}-${partIndex}`}>{part.slice(2, -2)}</strong>;
-      }
-      return <span key={`${lineIndex}-${partIndex}`}>{part}</span>;
-    });
-
-    return (
-      <span key={`line-${lineIndex}`}>
-        {fragments}
-        {lineIndex < text.split('\n').length - 1 && <br />}
-      </span>
-    );
-  });
+function MarkdownRenderer({ content, onExpandTable }) {
+  if (!content) return null;
+  return (
+    <div className="rp-markdown">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          table: ({ node, children, ...props }) => (
+            <div className="rp-chatbot__table-card">
+              <div className="rp-chatbot__table-head">
+                <div className="rp-chatbot__table-head-main">
+                  <span>Bảng số liệu</span>
+                  <button
+                    type="button"
+                    className="rp-chatbot__table-expand-btn"
+                    onClick={() => onExpandTable(children)}
+                    title="Xem bảng đầy đủ"
+                  >
+                    <FaExpand size={11} />
+                  </button>
+                </div>
+              </div>
+              <div className="rp-chatbot__table-wrap">
+                <table {...props}>{children}</table>
+              </div>
+            </div>
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
 }
 
 export default function ChatbotWidget() {
@@ -86,6 +103,8 @@ export default function ChatbotWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([initialAssistantMessage]);
   const [loadedProjectId, setLoadedProjectId] = useState(null);
+  const [activeModalTable, setActiveModalTable] = useState(null);
+  const [activeModalMarkdownTable, setActiveModalMarkdownTable] = useState(null);
   const scrollAnchorRef = useRef(null);
 
   const suggestedPrompts = [
@@ -138,6 +157,8 @@ export default function ChatbotWidget() {
   useEffect(() => {
     if (!isOpen) {
       setLoadedProjectId(null);
+      setActiveModalTable(null);
+      setActiveModalMarkdownTable(null);
     }
   }, [isOpen]);
 
@@ -309,12 +330,27 @@ export default function ChatbotWidget() {
                         item.isError ? 'is-error' : ''
                       }`}
                     >
-                      <div className="rp-chatbot__bubble">{renderMarkdownLite(answerText)}</div>
+                      <div className="rp-chatbot__bubble">
+                        <MarkdownRenderer
+                          content={answerText}
+                          onExpandTable={setActiveModalMarkdownTable}
+                        />
+                      </div>
 
                       {item.table && (
                         <div className="rp-chatbot__table-card">
                           <div className="rp-chatbot__table-head">
-                            <span>{t('chatbot.dataTable', 'Data Table')}</span>
+                            <div className="rp-chatbot__table-head-main">
+                              <span>{t('chatbot.dataTable', 'Data Table')}</span>
+                              <button
+                                type="button"
+                                className="rp-chatbot__table-expand-btn"
+                                onClick={() => setActiveModalTable(item.table)}
+                                title={t('chatbot.viewFullTable', 'View full table')}
+                              >
+                                <FaExpand size={11} />
+                              </button>
+                            </div>
                             <small>
                               {t('chatbot.rows', '{{count}} rows', { count: item.table.data?.length || 0 })}
                             </small>
@@ -418,6 +454,73 @@ export default function ChatbotWidget() {
         </span>
         <span className="rp-chatbot__launcher-text">AI Chat</span>
       </button>
+
+      {(activeModalTable || activeModalMarkdownTable) && (
+        <div
+          className="rp-chatbot__modal-overlay"
+          onClick={() => {
+            setActiveModalTable(null);
+            setActiveModalMarkdownTable(null);
+          }}
+        >
+          <div className="rp-chatbot__modal-card" onClick={(e) => e.stopPropagation()}>
+            <header className="rp-chatbot__modal-header">
+              <div className="rp-chatbot__modal-title-group">
+                <h3>{t('chatbot.dataTable', 'Data Table')}</h3>
+                {activeModalTable && (
+                  <span className="rp-chatbot__modal-badge">
+                    {t('chatbot.rows', '{{count}} rows', { count: activeModalTable.data?.length || 0 })}
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                className="rp-chatbot__modal-close"
+                onClick={() => {
+                  setActiveModalTable(null);
+                  setActiveModalMarkdownTable(null);
+                }}
+                aria-label={t('chatbot.close', 'Close')}
+              >
+                <IoMdClose size={20} />
+              </button>
+            </header>
+            <div className="rp-chatbot__modal-body">
+              <div className="rp-chatbot__modal-table-wrap">
+                {activeModalTable ? (
+                  <table>
+                    <thead>
+                      <tr>
+                        {activeModalTable.columns?.map((column) => (
+                          <th key={column.key}>{column.label}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activeModalTable.data?.map((row, rowIndex) => (
+                        <tr key={row.article_id || row.journal_id || `row-${rowIndex}`}>
+                          {activeModalTable.columns?.map((column) => (
+                            <td
+                              key={`${rowIndex}-${column.key}`}
+                              className={numberLikeColumns.has(column.key) ? 'is-number' : ''}
+                            >
+                              {row[column.key] ?? '—'}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <table>
+                    {activeModalMarkdownTable}
+                  </table>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
