@@ -44,8 +44,11 @@ const CollaborationInsightsCard = ({ data, projectId, filters }) => {
       searchParams.set('subject_area', filters.subject_category);
     }
 
-    const baseURL = import.meta.env.VITE_API_BASE_URL || '';
-    window.location.href = `${baseURL}/analytics/network/chord/export?${searchParams.toString()}`;
+    const baseURL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+    const exportPath = '/analytics/network/chord/export';
+    const queryString = searchParams.toString();
+    const exportUrl = `${baseURL}${exportPath}${queryString ? `?${queryString}` : ''}`;
+    window.location.href = exportUrl;
   };
 
   const MoleculeIcon = () => (
