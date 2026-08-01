@@ -12,20 +12,7 @@ const KeywordTrendVectorsChart = ({ data, timeframe, onTimeframeChange }) => {
             <h2 className="kn-card-title">{t('volume.keywordTrendVectors', 'Keyword Trend Vectors')}</h2>
             <p className="kn-card-subtitle">{t('volume.frontierTopicAcceleration', 'Frontier topic acceleration over the last 12 months')}</p>
           </div>
-          <div className="kn-toggle-group">
-            <button 
-              className={`kn-toggle-btn ${timeframe === 'daily' ? 'active' : ''}`}
-              onClick={() => onTimeframeChange('daily')}
-            >
-              {t('volume.daily', 'Daily')}
-            </button>
-            <button 
-              className={`kn-toggle-btn ${timeframe === 'monthly' ? 'active' : ''}`}
-              onClick={() => onTimeframeChange('monthly')}
-            >
-              {t('volume.monthly', 'Monthly')}
-            </button>
-          </div>
+
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 250, color: 'var(--color-neutral-400)', fontSize: '0.875rem' }}>
           {t('volume.noTrendVectorData', 'No trend vector data available for the selected timeframe.')}
@@ -46,20 +33,7 @@ const KeywordTrendVectorsChart = ({ data, timeframe, onTimeframeChange }) => {
           <h2 className="kn-card-title">{t('volume.keywordTrendVectors', 'Keyword Trend Vectors')}</h2>
           <p className="kn-card-subtitle">{t('volume.frontierTopicAcceleration', 'Frontier topic acceleration over the last 12 months')}</p>
         </div>
-        <div className="kn-toggle-group">
-          <button 
-            className={`kn-toggle-btn ${timeframe === 'daily' ? 'active' : ''}`}
-            onClick={() => onTimeframeChange('daily')}
-          >
-            {t('volume.daily', 'Daily')}
-          </button>
-          <button 
-            className={`kn-toggle-btn ${timeframe === 'monthly' ? 'active' : ''}`}
-            onClick={() => onTimeframeChange('monthly')}
-          >
-            {t('volume.monthly', 'Monthly')}
-          </button>
-        </div>
+
       </div>
       <div style={{ width: '100%', height: 250, marginTop: '24px' }}>
         <ResponsiveContainer width="100%" height="100%">
