@@ -16,7 +16,6 @@ const CustomTooltip = ({ active, payload }) => {
         <p className="frontier-tooltip-topic">{data.topic}</p>
         <p className="frontier-tooltip-metric">{t('dashboard.impact', 'Impact')}: <span>{data.impact}</span></p>
         <p className="frontier-tooltip-metric">{t('dashboard.velocity', 'Velocity')}: <span>{data.velocity}</span></p>
-        <p className="frontier-tooltip-metric">{t('dashboard.volume', 'Volume')}: <span>{data.size}</span></p>
       </div>
     );
   }
