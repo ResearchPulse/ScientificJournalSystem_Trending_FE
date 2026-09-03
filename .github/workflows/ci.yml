@@ -16,12 +16,12 @@ jobs:
   build-and-test:
     name: Build and Test
     env:
-      VITE_API_BASE_URL: http://100.121.61.95:3000
-      VITE_API_CORE_URL: http://100.121.61.95:8000
-      VITE_ARTICLE_GRAPH_ENDPOINT: /articles/search
-      VITE_PARENT_ORIGIN: '*'
-      VITE_RAG_CHAT_URL: http://100.121.61.95:3000/api/v1/chat
-      VITE_PAGE_BASE_URL: http://100.121.61.95:81
+      VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+      VITE_API_CORE_URL: ${{ secrets.VITE_API_CORE_URL }}
+      VITE_ARTICLE_GRAPH_ENDPOINT: ${{ secrets.VITE_ARTICLE_GRAPH_ENDPOINT }}
+      VITE_PARENT_ORIGIN: ${{ secrets.VITE_PARENT_ORIGIN }}
+      VITE_RAG_CHAT_URL: ${{ secrets.VITE_RAG_CHAT_URL }}
+      VITE_PAGE_BASE_URL: ${{ secrets.VITE_PAGE_BASE_URL }}
     runs-on: ubuntu-latest
     
     strategy:
@@ -79,12 +79,12 @@ jobs:
             ghcr.io/leduycoder/scientificjournalsystem-trending-fe:latest
             ghcr.io/leduycoder/scientificjournalsystem-trending-fe:${{ github.sha }}
           build-args: |
-            VITE_API_BASE_URL=http://100.121.61.95:3000
-            VITE_API_CORE_URL=http://100.121.61.95:8000
-            VITE_ARTICLE_GRAPH_ENDPOINT=/articles/search
-            VITE_PARENT_ORIGIN=*
-            VITE_RAG_CHAT_URL=http://100.121.61.95:3000/api/v1/chat
-            VITE_PAGE_BASE_URL=http://100.121.61.95:81
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+            VITE_API_CORE_URL=${{ secrets.VITE_API_CORE_URL }}
+            VITE_ARTICLE_GRAPH_ENDPOINT=${{ secrets.VITE_ARTICLE_GRAPH_ENDPOINT }}
+            VITE_PARENT_ORIGIN=${{ secrets.VITE_PARENT_ORIGIN }}
+            VITE_RAG_CHAT_URL=${{ secrets.VITE_RAG_CHAT_URL }}
+            VITE_PAGE_BASE_URL=${{ secrets.VITE_PAGE_BASE_URL }}
 
   deploy:
     name: Deploy to VPS
@@ -100,6 +100,12 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/apps/researchpulse-trending-fe
-            docker-compose pull
-            docker-compose up -d
+
+            echo "Pull latest Docker image..."
+            docker-compose pull trending-frontend
+
+            echo "Recreate frontend container..."
+            docker-compose up -d --force-recreate trending-frontend
+
+            echo "Remove unused images..."
             docker image prune -f
