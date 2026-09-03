@@ -110,6 +110,17 @@ export default function DashboardFilters() {
 
           <div className="dashboard-filter-group">
             <FilterDropdown
+              title={t('dashboard.filters.subCategory', 'Sub-Category')}
+              value={filters.sub_category}
+              options={['All Sub-categories', 'Research', 'Development', 'Innovation', 'Analysis']}
+              onChange={(val) => updateFilter('sub_category', val)}
+              defaultValue="All Sub-categories"
+              searchable={true}
+            />
+          </div>
+
+          <div className="dashboard-filter-group">
+            <FilterDropdown
               title={t('dashboard.filters.zone', 'Zone')}
               value={filters.region}
               options={REGION_OPTIONS}
@@ -139,6 +150,10 @@ export default function DashboardFilters() {
         <div className="dashboard-chip">
           <span className="chip-label">{t('dashboard.filters.subjectCategory', 'Subject Category')}:</span>
           <span className="chip-value">{t(`dashboard.filters.${filters.subject_category}`, filters.subject_category)}</span>
+        </div>
+        <div className="dashboard-chip">
+          <span className="chip-label">{t('dashboard.filters.subCategory', 'Sub-Category')}:</span>
+          <span className="chip-value">{t(`dashboard.filters.${filters.sub_category}`, filters.sub_category)}</span>
         </div>
         <div className="dashboard-chip">
           <span className="chip-label">{t('dashboard.filters.region', 'Region')}:</span>

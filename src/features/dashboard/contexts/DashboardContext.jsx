@@ -15,6 +15,7 @@ export const DashboardProvider = ({ children, projectId }) => {
     timeframe: 'Last 5 Years',
     domain: 'All Domains',
     subject_category: 'All Categories',
+    sub_category: 'All Sub-categories',
     region: 'Global Distribution'
   });
 
