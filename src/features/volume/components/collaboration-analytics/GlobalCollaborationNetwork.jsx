@@ -164,8 +164,7 @@ const GlobalCollaborationNetwork = ({ data }) => {
               }}
               enableNodeDrag={true}
               enableZoomPanInteraction={true}
-              nodeCanvasObject={(node, ctx, globalScale) => {
-                const label = node.label;
+              nodeCanvasObject={(node, ctx) => {
                 const size = node.val || 5;
                 const color = node.type === 'author' ? '#ff6b00' : '#1b2432';
 

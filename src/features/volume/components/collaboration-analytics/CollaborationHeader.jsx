@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import apiClient from '../../../../shared/api/axios';
 import './CollaborationAnalytics.css';
@@ -8,7 +8,6 @@ const CollaborationHeader = () => {
   const { t } = useTranslation();
   const { id } = useParams();
   const projectId = id === 'default-id' ? '1' : id;
-  const navigate = useNavigate();
 
   const handleExportData = async () => {
     try {

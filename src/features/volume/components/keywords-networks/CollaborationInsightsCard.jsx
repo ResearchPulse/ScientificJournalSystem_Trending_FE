@@ -1,6 +1,33 @@
 import { useTranslation } from 'react-i18next';
 import { FiDownload } from 'react-icons/fi';
 
+const MoleculeIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'white', display: 'block', marginBottom: '16px' }}>
+    <circle cx="12" cy="7" r="3.5" fill="white" />
+    <circle cx="6" cy="15" r="3" fill="white" />
+    <circle cx="18" cy="15" r="3" fill="white" />
+    <circle cx="12" cy="16" r="2" fill="white" />
+    <line x1="12" y1="7" x2="6" y2="15" stroke="white" strokeWidth="2.5" />
+    <line x1="12" y1="7" x2="18" y2="15" stroke="white" strokeWidth="2.5" />
+    <line x1="12" y1="7" x2="12" y2="16" stroke="white" strokeWidth="2.5" />
+  </svg>
+);
+
+const RocketIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-primary-orange)', display: 'block' }}>
+    <path d="M4.5 16.5c-1.5 1.25-2.5 3.5-2.5 3.5s2.25-1 3.5-2.5M14 2 3.8 12.2a3 3 0 0 0 0 4.2l.8.8a3 3 0 0 0 4.2 0L19 7" />
+    <path d="M12 12c2-2 5-2 7-4l3-3-3-3-3 3c-2 2-2 5-4 7Z" />
+    <circle cx="14.5" cy="9.5" r="1" fill="currentColor" />
+  </svg>
+);
+
+const MapPinIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-primary-orange)', display: 'block' }}>
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
 const CollaborationInsightsCard = ({ data, projectId, filters }) => {
   const { t } = useTranslation();
   const description = data?.description || t('volume.insightsDefaultDesc', 'Global research output has shifted significantly towards multi-national clusters, with Japan and the EU showing the highest reciprocal citation growth of 18% YoY.');
@@ -50,33 +77,6 @@ const CollaborationInsightsCard = ({ data, projectId, filters }) => {
     const exportUrl = `${baseURL}${exportPath}${queryString ? `?${queryString}` : ''}`;
     window.location.href = exportUrl;
   };
-
-  const MoleculeIcon = () => (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'white', display: 'block', marginBottom: '16px' }}>
-      <circle cx="12" cy="7" r="3.5" fill="white" />
-      <circle cx="6" cy="15" r="3" fill="white" />
-      <circle cx="18" cy="15" r="3" fill="white" />
-      <circle cx="12" cy="16" r="2" fill="white" />
-      <line x1="12" y1="7" x2="6" y2="15" stroke="white" strokeWidth="2.5" />
-      <line x1="12" y1="7" x2="18" y2="15" stroke="white" strokeWidth="2.5" />
-      <line x1="12" y1="7" x2="12" y2="16" stroke="white" strokeWidth="2.5" />
-    </svg>
-  );
-
-  const RocketIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-primary-orange)', display: 'block' }}>
-      <path d="M4.5 16.5c-1.5 1.25-2.5 3.5-2.5 3.5s2.25-1 3.5-2.5M14 2 3.8 12.2a3 3 0 0 0 0 4.2l.8.8a3 3 0 0 0 4.2 0L19 7" />
-      <path d="M12 12c2-2 5-2 7-4l3-3-3-3-3 3c-2 2-2 5-4 7Z" />
-      <circle cx="14.5" cy="9.5" r="1" fill="currentColor" />
-    </svg>
-  );
-
-  const MapPinIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-primary-orange)', display: 'block' }}>
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
 
   return (
     <div className="kn-card" style={{ backgroundColor: 'var(--color-primary-orange)', border: 'none', justifyContent: 'space-between' }}>

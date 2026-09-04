@@ -12,7 +12,7 @@ export const useCollaborationAnalytics = () => {
     try {
       const result = await fetchCollaborationAnalytics();
       setData(result);
-    } catch (err) {
+    } catch {
       setError('Failed to fetch collaboration analytics data');
     } finally {
       setIsLoading(false);

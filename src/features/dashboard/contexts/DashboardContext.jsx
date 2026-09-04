@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState } from 'react';
 
 const DashboardContext = createContext();
 
@@ -15,6 +16,7 @@ export const DashboardProvider = ({ children, projectId }) => {
     timeframe: 'Last 5 Years',
     domain: 'All Domains',
     subject_category: 'All Categories',
+    sub_category: 'All Sub-categories',
     region: 'Global Distribution'
   });
 

@@ -65,7 +65,7 @@ function MarkdownRenderer({ content, onExpandTable }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          table: ({ node, children, ...props }) => (
+          table: ({ children, ...props }) => (
             <div className="rp-chatbot__table-card">
               <div className="rp-chatbot__table-head">
                 <div className="rp-chatbot__table-head-main">

@@ -128,7 +128,7 @@ export default function WorldMap({
       const item = heatMapData[geoName];
 
       layer.on({
-        click: (e) => {
+        click: () => {
           if (alpha2) {
             onCountryChange(selectedCountryCode === alpha2 ? '' : alpha2);
           }
