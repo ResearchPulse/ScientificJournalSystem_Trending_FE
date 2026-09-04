@@ -83,7 +83,7 @@ export const clearProjectCache = (projectId) => {
   if (!projectId) return;
   try {
     localStorage.removeItem(`project_analytics_cache_${projectId}`);
-  } catch (e) {
+  } catch {
     // Ignore error
   }
 };

@@ -16,6 +16,10 @@ const DashboardLayout = () => {
   const queryClient = useQueryClient();
   const [loadedProjectId, setLoadedProjectId] = useState(null);
 
+  const navigate = useNavigate();
+  const { lang } = useParams();
+  const currentLang = lang || 'en';
+
   useEffect(() => {
     if (id && id !== loadedProjectId) {
       // Attempt to load from localStorage cache first
@@ -27,14 +31,6 @@ const DashboardLayout = () => {
       }
     }
   }, [id, loadedProjectId, queryClient]);
-
-  if (id === 'default-id') {
-    return <Navigate to="/projects" replace />;
-  }
-
-  const navigate = useNavigate();
-  const { lang } = useParams();
-  const currentLang = lang || 'en';
 
   const handlePreloadComplete = () => {
     setLoadedProjectId(id);
@@ -73,6 +69,10 @@ const DashboardLayout = () => {
       clearTimeout(timer);
     };
   }, [id, queryClient]);
+
+  if (id === 'default-id') {
+    return <Navigate to="/projects" replace />;
+  }
 
   return (
     <DashboardProvider projectId={id}>

@@ -71,7 +71,7 @@ export default function DashboardFilters() {
       }
     };
     loadCategories();
-  }, [projectId, window.location.search]);
+  }, [projectId]);
 
   const handleUpdate = () => {
     refreshData();

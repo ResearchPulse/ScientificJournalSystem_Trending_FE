@@ -53,26 +53,28 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      return new Promise(async (resolve, reject) => {
-        try {
-          // Call refresh API
-          await axios.get(`${API_BASE_URL}/api/v1/auth/refresh`, {
-            withCredentials: true,
-          });
+      return new Promise((resolve, reject) => {
+        (async () => {
+          try {
+            // Call refresh API
+            await axios.get(`${API_BASE_URL}/api/v1/auth/refresh`, {
+              withCredentials: true,
+            });
 
-          // If success, backend automatically sets new access_token cookie.
-          // We don't need to manually extract it or set it in headers.
-          useAuthStore.getState().loginSuccess(null); // Just update auth state to logged in if needed
+            // If success, backend automatically sets new access_token cookie.
+            // We don't need to manually extract it or set it in headers.
+            useAuthStore.getState().loginSuccess(null); // Just update auth state to logged in if needed
 
-          processQueue(null);
-          resolve(apiClient(originalRequest));
-        } catch (refreshError) {
-          processQueue(refreshError);
-          useAuthStore.getState().logout();
-          reject(refreshError);
-        } finally {
-          isRefreshing = false;
-        }
+            processQueue(null);
+            resolve(apiClient(originalRequest));
+          } catch (refreshError) {
+            processQueue(refreshError);
+            useAuthStore.getState().logout();
+            reject(refreshError);
+          } finally {
+            isRefreshing = false;
+          }
+        })();
       });
     }
 
@@ -114,23 +116,25 @@ coreApiClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      return new Promise(async (resolve, reject) => {
-        try {
-          await axios.get(`${import.meta.env.VITE_API_CORE_URL || 'http://localhost:3000'}/api/v1/auth/refresh`, {
-            withCredentials: true,
-          });
+      return new Promise((resolve, reject) => {
+        (async () => {
+          try {
+            await axios.get(`${import.meta.env.VITE_API_CORE_URL || 'http://localhost:3000'}/api/v1/auth/refresh`, {
+              withCredentials: true,
+            });
 
-          useAuthStore.getState().loginSuccess(null);
+            useAuthStore.getState().loginSuccess(null);
 
-          processQueue(null);
-          resolve(coreApiClient(originalRequest));
-        } catch (refreshError) {
-          processQueue(refreshError);
-          useAuthStore.getState().logout();
-          reject(refreshError);
-        } finally {
-          isRefreshing = false;
-        }
+            processQueue(null);
+            resolve(coreApiClient(originalRequest));
+          } catch (refreshError) {
+            processQueue(refreshError);
+            useAuthStore.getState().logout();
+            reject(refreshError);
+          } finally {
+            isRefreshing = false;
+          }
+        })();
       });
     }
 

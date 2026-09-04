@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FiBell, FiHelpCircle } from 'react-icons/fi';
 import SearchInput from './SearchInput';
 import IconButton from './IconButton';
-import { headerConfig } from './header.config';
+
 import { useDashboardSearchQuery } from '../../../hooks/useDashboardSearch';
 import LanguageSelector from '../../common/LanguageSelector';
 import './Header.css';

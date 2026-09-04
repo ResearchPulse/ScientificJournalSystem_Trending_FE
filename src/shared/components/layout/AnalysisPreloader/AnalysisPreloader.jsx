@@ -325,7 +325,8 @@ export default function AnalysisPreloader({ projectId, onComplete }) {
     return () => {
       active = false;
     };
-  }, [projectId, retryTrigger]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, retryTrigger, queryClient]);
 
   // Auto-scroll logs
   useEffect(() => {
@@ -363,7 +364,7 @@ export default function AnalysisPreloader({ projectId, onComplete }) {
   const lastCompleted = [...logs].reverse().find(l => l.status === 'DONE');
   const currentLoading = logs.find(l => l.status === 'LOADING');
   
-  let statusText = '';
+  let statusText;
   if (hasErrors && isFinished) {
     statusText = t('dashboard.preloaderErrorStatus', 'Quá trình phân tích gặp sự cố ở một vài hạng mục.');
   } else if (lastCompleted) {

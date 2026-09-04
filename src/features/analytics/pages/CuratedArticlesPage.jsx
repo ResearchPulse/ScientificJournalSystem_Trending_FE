@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Tabs } from '../components/Tabs/Tabs';
@@ -45,8 +45,6 @@ const CuratedArticlesPage = () => {
     articles,
     pagination,
     keywords,
-    setKeywords,
-    journals,
     loading,
     error,
     refetch,

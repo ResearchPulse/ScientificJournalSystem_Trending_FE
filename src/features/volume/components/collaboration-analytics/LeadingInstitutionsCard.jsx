@@ -4,6 +4,19 @@ import './CollaborationAnalytics.css';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, Label } from 'recharts';
 import { FiList, FiBarChart2 } from 'react-icons/fi';
 
+const CustomTooltip = ({ active, payload }) => {
+  const { t } = useTranslation();
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ background: 'white', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+        <p style={{ margin: '0 0 6px 0', fontWeight: 'bold', color: '#1e293b', fontSize: '13px' }}>{payload[0].payload.rawName}</p>
+        <p style={{ margin: 0, color: '#1b2432', fontWeight: '600', fontSize: '13px' }}>{t('volume.citations', 'Citations')}: {payload[0].value}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 const LeadingInstitutionsCard = ({ data }) => {
   const { t } = useTranslation();
   const [isChartView, setIsChartView] = useState(false);
@@ -23,18 +36,6 @@ const LeadingInstitutionsCard = ({ data }) => {
     score: item.score !== undefined ? Number(item.score).toFixed(1) : 0,
     rawName: item.name
   })) || [];
-
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{ background: 'white', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-          <p style={{ margin: '0 0 6px 0', fontWeight: 'bold', color: '#1e293b', fontSize: '13px' }}>{payload[0].payload.rawName}</p>
-          <p style={{ margin: 0, color: '#1b2432', fontWeight: '600', fontSize: '13px' }}>{t('volume.citations', 'Citations')}: {payload[0].value}</p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div className="ca-card">

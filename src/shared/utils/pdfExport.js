@@ -256,7 +256,6 @@ const drawLineChart = (doc, x, y, w, h, data, color = COLORS.primary) => {
   doc.setFillColor(color[0], color[1], color[2]);
   doc.setGState(new doc.GState({ opacity: 0.1 }));
   doc.moveTo(points[0].px, chartY + chartH);
-  let pathStr = `${points[0].px} ${chartY + chartH} m `;
   // Instead of using advanced path, fill a polygon via individual lines
   // jsPDF doesn't natively support polygon fill easily, so we'll skip the area fill
   // and just do the line
@@ -289,7 +288,7 @@ const drawLineChart = (doc, x, y, w, h, data, color = COLORS.primary) => {
 /**
  * Draws horizontal bar chart in the PDF.
  */
-const drawHorizontalBarChart = (doc, x, y, w, h, data, color = COLORS.primary) => {
+const drawHorizontalBarChart = (doc, x, y, w, h, data) => {
   if (!Array.isArray(data) || data.length === 0) return;
 
   const items = data.slice(0, 10); // max 10 items
@@ -739,7 +738,7 @@ const addStyledTable = (doc, head, body, currentY, options = {}) => {
       cellWidth: 'auto',
     },
     columnStyles: options.columnStyles || {},
-    didDrawPage: (data) => {
+    didDrawPage: () => {
       // Ensure proper Y tracking after page breaks
     },
     ...options,
@@ -1384,7 +1383,7 @@ export const generateProfessionalReport = async (queryClient, projectId) => {
         }
         currentY = addSubsectionTitle(doc, 'Collaboration Network Metrics', currentY);
         const metricRows = Object.entries(metrics)
-          .filter(([k, v]) => typeof v === 'number' || typeof v === 'string')
+          .filter(([, v]) => typeof v === 'number' || typeof v === 'string')
           .slice(0, 10)
           .map(([k, v]) => [k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), typeof v === 'number' ? fmt(v) : String(v)]);
         if (metricRows.length > 0) {
