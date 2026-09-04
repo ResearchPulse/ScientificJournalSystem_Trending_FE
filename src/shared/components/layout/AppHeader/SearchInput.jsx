@@ -88,7 +88,7 @@ const SearchInput = ({
   onPageChange,
   onResultSelect,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const containerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const trimmedValue = value.trim();

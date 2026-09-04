@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FiFilter, FiTrendingUp, FiCheck, FiChevronDown } from 'react-icons/fi';
+import { FiFilter, FiCheck, FiChevronDown, FiX } from 'react-icons/fi';
 import { BiSortAlt2 } from 'react-icons/bi';
 import { coreApiClient } from '../../../shared/api/axios';
 import ErrorStateSection from '../../../shared/components/common/ErrorStateSection';
@@ -53,7 +53,7 @@ export default function ProjectsPage() {
 
   const domains = ['ALL', 'ARTIFICIAL INTELLIGENCE', 'QUANTUM PHYSICS', 'BIOINFORMATICS', 'ENVIRONMENTAL SCIENCE', 'COMPUTER NETWORKS'];
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -70,11 +70,11 @@ export default function ProjectsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
 
   const handleProjectClick = (projectId) => {
     navigate(`/project/${projectId}/dashboard`);

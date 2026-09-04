@@ -28,7 +28,7 @@ const SidebarFooter = ({ collapsed }) => {
   const handleAction = (action) => {
     if (action === 'logout') {
       // Redirect to home page
-      window.location.href = import.meta.env.VITE_PAGE_BASE_URL || '/';
+      window.location.assign(import.meta.env.VITE_PAGE_BASE_URL || '/');
     } else if (action === 'support') {
       navigate(`/${currentLang}/support`);
     } else if (action === 'export-pdf') {

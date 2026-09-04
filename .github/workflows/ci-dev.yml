@@ -1,0 +1,43 @@
+name: CI Development
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  build-and-test:
+    name: Build, Lint and Test
+    env:
+      VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+      VITE_API_CORE_URL: ${{ secrets.VITE_API_CORE_URL }}
+      VITE_ARTICLE_GRAPH_ENDPOINT: ${{ secrets.VITE_ARTICLE_GRAPH_ENDPOINT }}
+      VITE_PARENT_ORIGIN: ${{ secrets.VITE_PARENT_ORIGIN }}
+      VITE_RAG_CHAT_URL: ${{ secrets.VITE_RAG_CHAT_URL }}
+      VITE_PAGE_BASE_URL: ${{ secrets.VITE_PAGE_BASE_URL }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Build project
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test --if-present

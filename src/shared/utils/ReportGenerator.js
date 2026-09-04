@@ -11,7 +11,7 @@ export class ReportGenerator {
     this.primaryColor = [37, 99, 235]; // #2563EB
   }
 
-  async addCoverPage(data) {
+  async addCoverPage() {
     this.doc.setFillColor(...this.primaryColor);
     this.doc.rect(0, 0, 210, 297, 'F');
     this.doc.setTextColor(255, 255, 255);

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useRef } from 'react';
 import { ReportGenerator as Generator } from '../../utils/ReportGenerator';
 

@@ -18,8 +18,6 @@ export default function ArticleGraphWidget({
   data,
   loading = false,
   error = '',
-  keyword = 'graph',
-  limit = 50,
 }) {
   const { t } = useTranslation();
   const fgRef = useRef(null);
