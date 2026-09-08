@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 const KeywordTrendVectorsChart = ({ data, timeframe, onTimeframeChange }) => {
   const { t } = useTranslation();
 
-  if (!data || data.length === 0) {
+  if (!Array.isArray(data) || data.length === 0) {
     return (
       <div className="kn-card">
         <div className="kn-card-header">

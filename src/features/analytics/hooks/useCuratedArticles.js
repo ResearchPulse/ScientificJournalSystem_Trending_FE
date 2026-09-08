@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { analyticsService } from '../services/analyticsService';
 
 const extractData = (res) => {
@@ -31,7 +31,8 @@ export const useCuratedArticles = (projectId, page = 1, filters = {}) => {
       return extractData(res) || { items: [], totalPages: 1, total: 0, currentPage: 1 };
     },
     enabled: !!projectId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 
   // Query 2: Keywords

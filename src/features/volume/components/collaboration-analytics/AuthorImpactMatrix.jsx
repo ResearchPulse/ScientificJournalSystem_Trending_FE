@@ -36,20 +36,28 @@ const AuthorImpactMatrix = ({ data }) => {
           <div style={{ position: 'absolute', left: '75%', top: 0, bottom: 0, width: '1px', background: 'var(--color-neutral-200)' }}></div>
         </div>
         
+        {/* Empty state overlay */}
+        {data.length === 0 && (
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#94a3b8', zIndex: 1 }}>
+            {t('volume.noData', 'No data available for this project.')}
+          </div>
+        )}
+
         {/* Plot points */}
         <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', overflow: 'visible' }}>
-          {data.map(point => {
-            const jitterX = (Math.sin(point.id * 12.9898) * 43758.5453) % 1; 
-            const jitterY = (Math.cos(point.id * 78.233) * 43758.5453) % 1;
-            const finalX = Math.max(1, Math.min(99, point.x + jitterX * 1.5));
-            const finalY = Math.max(1, Math.min(99, point.y + jitterY * 1.5));
+          {data.map((point, idx) => {
+            const numId = Number(point.id) || (idx + 1);
+            const jitterX = (Math.sin(numId * 12.9898) * 43758.5453) % 1; 
+            const jitterY = (Math.cos(numId * 78.233) * 43758.5453) % 1;
+            const finalX = Math.max(1, Math.min(99, (Number(point.x) || 0) + jitterX * 1.5));
+            const finalY = Math.max(1, Math.min(99, (Number(point.y) || 0) + jitterY * 1.5));
 
             return (
               <circle
-                key={point.id}
+                key={point.id || idx}
                 cx={`${finalX}%`}
                 cy={`${100 - finalY}%`}
-                r={point.r * 1.5}
+                r={(point.r || 5) * 1.5}
                 fill="none"
                 stroke="#ff6b00"
                 strokeWidth="2"

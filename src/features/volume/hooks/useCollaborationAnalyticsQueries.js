@@ -18,9 +18,7 @@ export const useInfluentialRankingsQuery = (projectId) => {
       params: { project_id: projectId, limit: 10 }
     }),
     enabled: !!projectId,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 5 * 60 * 1000,
     select: (response) => response?.data || { authors: [], institutions: [] },
   });
 };
@@ -36,9 +34,7 @@ export const useAuthorProductivityMatrixQuery = (projectId) => {
       params: { project_id: projectId }
     }),
     enabled: !!projectId,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 5 * 60 * 1000,
     select: (response) => {
       const data = response?.data || [];
       if (!data.length) return [];
@@ -77,9 +73,7 @@ export const useCollaborationInsightsQuery = (projectId) => {
       params: { project_id: projectId }
     }),
     enabled: !!projectId,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 5 * 60 * 1000,
     select: (response) => response?.data || null,
   });
 };
@@ -95,9 +89,7 @@ export const useGlobalCollaborationNetworkQuery = (projectId) => {
       params: { project_id: projectId }
     }),
     enabled: !!projectId,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 5 * 60 * 1000,
     select: (response) => {
       const data = response?.data || { nodes: [], edges: [] };
       
@@ -137,9 +129,7 @@ export const useTopicIntensityMatrixQuery = (projectId, type) => {
       params: { project_id: projectId, row_type: type }
     }),
     enabled: !!projectId && !!type,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 5 * 60 * 1000,
     select: (response) => {
       const rawData = response?.data || [];
       if (!Array.isArray(rawData) || rawData.length === 0) return null;
