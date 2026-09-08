@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import apiClient from '../../../shared/api/axios';
 
 /**
@@ -27,7 +27,7 @@ export const useTrackedJournalsQuery = (projectId, page = 1, limit = 4) => {
       return rawData;
     },
     enabled: !!projectId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    keepPreviousData: true,
+    staleTime: 10 * 60 * 1000, // 10 minutes cache
+    placeholderData: keepPreviousData,
   });
 };
