@@ -1,5 +1,5 @@
 const ONE_HOUR_MS = 60 * 60 * 1000;
-const CACHE_PREFIX = 'project_analytics_cache_v2_';
+const CACHE_PREFIX = 'project_analytics_cache_v3_';
 
 const cleanLegacyCaches = () => {
   try {
