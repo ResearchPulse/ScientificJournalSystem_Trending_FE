@@ -50,7 +50,7 @@ export const useKeywordVectorsQuery = (projectId, filters = {}, refreshTrigger) 
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
-    select: (response) => response?.data,
+    select: (response) => (Array.isArray(response?.data) ? response.data : []),
   });
 };
 

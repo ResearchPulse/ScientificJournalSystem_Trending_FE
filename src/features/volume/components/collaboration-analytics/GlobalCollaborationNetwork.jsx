@@ -19,7 +19,7 @@ const GlobalCollaborationNetwork = ({ data }) => {
     const newHighlightNodes = new Set();
     const newHighlightLinks = new Set();
     
-    if (node) {
+    if (node && Array.isArray(data?.links)) {
       newHighlightNodes.add(node.id);
       data.links.forEach(link => {
         const sourceId = typeof link.source === 'object' ? link.source.id : link.source;

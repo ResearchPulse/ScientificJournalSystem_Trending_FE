@@ -92,34 +92,40 @@ const TopInfluentialAuthorsCard = ({ data }) => {
       {/* LIST VIEW */}
       {!isChartView && (
         <div>
-          {data?.slice(0, 5).map((item, index) => {
-            const rankStr = (index + 1).toString().padStart(2, '0');
-            const score = item.score !== undefined ? Number(item.score).toFixed(1) : 0;
-            return (
-              <div key={index} className="ca-list-item" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div className="ca-list-item-left">
-                    <span className="ca-list-rank">{rankStr}</span>
-                    <span className="ca-list-name">{item.name}</span>
+          {!data || data.length === 0 ? (
+            <div style={{ padding: '32px 16px', textAlign: 'center', color: '#94a3b8' }}>
+              {t('volume.noAuthorsFound', 'No authors found for this project.')}
+            </div>
+          ) : (
+            data.slice(0, 5).map((item, index) => {
+              const rankStr = (index + 1).toString().padStart(2, '0');
+              const score = item.score !== undefined ? Number(item.score).toFixed(1) : 0;
+              return (
+                <div key={index} className="ca-list-item" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="ca-list-item-left">
+                      <span className="ca-list-rank">{rankStr}</span>
+                      <span className="ca-list-name">{item.name}</span>
+                    </div>
+                    <div>
+                      <span className="ca-list-score">{score}</span>
+                      <span className="ca-list-label" style={{ marginLeft: '4px', color: '#ff6b00' }}>{t('volume.impactScore', 'Impact Score')}</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="ca-list-score">{score}</span>
-                    <span className="ca-list-label" style={{ marginLeft: '4px', color: '#ff6b00' }}>{t('volume.impactScore', 'Impact Score')}</span>
+                  <div className="ca-list-bar-container">
+                    <div 
+                      className="ca-list-bar" 
+                      style={{ 
+                        width: animate ? `${Math.min(100, Math.max(0, score))}%` : '0%', 
+                        backgroundColor: '#ff6b00',
+                        transition: 'width 1.2s cubic-bezier(0.25, 1, 0.5, 1)'
+                      }}
+                    ></div>
                   </div>
                 </div>
-                <div className="ca-list-bar-container">
-                  <div 
-                    className="ca-list-bar" 
-                    style={{ 
-                      width: animate ? `${Math.min(100, Math.max(0, score))}%` : '0%', 
-                      backgroundColor: '#ff6b00',
-                      transition: 'width 1.2s cubic-bezier(0.25, 1, 0.5, 1)'
-                    }}
-                  ></div>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       )}
 

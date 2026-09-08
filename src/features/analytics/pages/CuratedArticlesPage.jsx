@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { analyticsService } from '../services/analyticsService';
 import { Tabs } from '../components/Tabs/Tabs';
 import { CuratedArticleCard } from '../components/CuratedArticleCard/CuratedArticleCard';
 import { KeywordPanel } from '../components/KeywordPanel/KeywordPanel';
@@ -29,6 +31,7 @@ const CuratedArticlesPage = () => {
   const { t } = useTranslation();
   const { id } = useParams();
   const projectId = id === 'default-id' || !id ? '1' : id;
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({});
   const [showFilters, setShowFilters] = useState(false);
@@ -49,6 +52,32 @@ const CuratedArticlesPage = () => {
     error,
     refetch,
   } = useCuratedArticles(projectId, currentPage, filters);
+
+  // Background prefetch next page for smooth and instant pagination
+  useEffect(() => {
+    if (pagination.totalPages && currentPage < pagination.totalPages) {
+      const nextPage = currentPage + 1;
+      queryClient.prefetchQuery({
+        queryKey: ['curatedArticles', projectId, nextPage, filters],
+        queryFn: async () => {
+          const res = await analyticsService.fetchCuratedArticles({
+            project_id: projectId,
+            page: nextPage,
+            limit: 10,
+            ...filters,
+          });
+          const extractData = (r) => {
+            if (!r) return null;
+            if (r.data && r.data.data !== undefined) return r.data.data;
+            if (r.data !== undefined) return r.data;
+            return r;
+          };
+          return extractData(res) || { items: [], totalPages: 1, total: 0, currentPage: nextPage };
+        },
+        staleTime: 10 * 60 * 1000,
+      });
+    }
+  }, [currentPage, pagination.totalPages, filters, projectId, queryClient]);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);

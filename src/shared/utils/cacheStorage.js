@@ -1,4 +1,18 @@
 const ONE_HOUR_MS = 60 * 60 * 1000;
+const CACHE_PREFIX = 'project_analytics_cache_v2_';
+
+const cleanLegacyCaches = () => {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('project_analytics_cache_') && !key.startsWith(CACHE_PREFIX)) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {
+    // Ignore error
+  }
+};
 
 /**
  * Save all queries for a given project to localStorage
@@ -9,6 +23,7 @@ export const saveProjectCache = (projectId, queryClient) => {
   if (!projectId) return;
 
   try {
+    cleanLegacyCaches();
     const allQueries = queryClient.getQueryCache().getAll();
     const cacheItems = [];
 
@@ -29,7 +44,7 @@ export const saveProjectCache = (projectId, queryClient) => {
       items: cacheItems
     };
 
-    localStorage.setItem(`project_analytics_cache_${projectId}`, JSON.stringify(payload));
+    localStorage.setItem(`${CACHE_PREFIX}${projectId}`, JSON.stringify(payload));
   } catch (error) {
     console.warn('Failed to save analytics cache to localStorage:', error);
   }
@@ -45,7 +60,8 @@ export const loadProjectCache = (projectId, queryClient) => {
   if (!projectId) return false;
 
   try {
-    const raw = localStorage.getItem(`project_analytics_cache_${projectId}`);
+    cleanLegacyCaches();
+    const raw = localStorage.getItem(`${CACHE_PREFIX}${projectId}`);
     if (!raw) return false;
 
     const payload = JSON.parse(raw);
@@ -55,7 +71,7 @@ export const loadProjectCache = (projectId, queryClient) => {
 
     // Check 1-hour expiration
     if (Date.now() - timestamp > ONE_HOUR_MS) {
-      localStorage.removeItem(`project_analytics_cache_${projectId}`);
+      localStorage.removeItem(`${CACHE_PREFIX}${projectId}`);
       return false;
     }
 
@@ -82,8 +98,10 @@ export const loadProjectCache = (projectId, queryClient) => {
 export const clearProjectCache = (projectId) => {
   if (!projectId) return;
   try {
-    localStorage.removeItem(`project_analytics_cache_${projectId}`);
+    cleanLegacyCaches();
+    localStorage.removeItem(`${CACHE_PREFIX}${projectId}`);
   } catch {
     // Ignore error
   }
 };
+
