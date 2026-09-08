@@ -82,7 +82,7 @@ export function useJournalsData() {
     gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
     select: (result) => {
-      const rawItems = result?.items || result?.data || result;
+      const rawItems = result?.items || result?.data?.items || (Array.isArray(result?.data) ? result.data : (Array.isArray(result) ? result : []));
       const items = Array.isArray(rawItems) ? rawItems : [];
       const mapped = items.map(item => ({
         ...item,
