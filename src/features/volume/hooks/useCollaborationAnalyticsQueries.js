@@ -19,7 +19,15 @@ export const useInfluentialRankingsQuery = (projectId) => {
     }),
     enabled: !!projectId,
     staleTime: 5 * 60 * 1000,
-    select: (response) => response?.data || { authors: [], institutions: [] },
+    select: (response) => {
+      const payload = response?.data?.authors || response?.data?.institutions 
+        ? response.data 
+        : (response?.authors || response?.institutions ? response : (response?.data || {}));
+      return {
+        authors: Array.isArray(payload?.authors) ? payload.authors : [],
+        institutions: Array.isArray(payload?.institutions) ? payload.institutions : []
+      };
+    },
   });
 };
 
