@@ -155,7 +155,7 @@ const TopInfluentialAuthorsCard = ({ data }) => {
                 </YAxis>
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: '#fff7f0' }} />
                 <Bar dataKey="score" radius={[4, 4, 0, 0]} barSize={38}>
-                  {chartData.map((entry, index) => (
+                  {chartData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill="#ff6b00" fillOpacity={1 - index * 0.12} />
                   ))}
                 </Bar>

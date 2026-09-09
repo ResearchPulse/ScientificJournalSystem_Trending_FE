@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-const KeywordTrendVectorsChart = ({ data, timeframe, onTimeframeChange }) => {
+const KeywordTrendVectorsChart = ({ data }) => {
   const { t } = useTranslation();
 
   if (!Array.isArray(data) || data.length === 0) {
