@@ -155,7 +155,7 @@ const LeadingInstitutionsCard = ({ data }) => {
                 </YAxis>
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f0f4f8' }} />
                 <Bar dataKey="score" radius={[4, 4, 0, 0]} barSize={38}>
-                  {chartData.map((entry, index) => (
+                  {chartData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill="#1b2432" fillOpacity={1 - index * 0.12} />
                   ))}
                 </Bar>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardFooter from '../../../shared/components/layout/DashboardFooter';
 import VolumeAnalyticsTabs from '../components/keywords-networks/VolumeAnalyticsTabs';
@@ -24,9 +24,8 @@ import '../components/keywords-networks/KeywordsNetworks.css';
 const KeywordsNetworksPage = () => {
   const { t } = useTranslation();
   const { projectId, filters, refreshTrigger, refreshData } = useDashboardContext();
-  const [localTimeframe, setLocalTimeframe] = useState('monthly');
 
-  const { data: keywordVectors, isLoading: isVectorsLoading, error: vectorsError } = useKeywordVectorsQuery(projectId, { ...filters, windowMonths: localTimeframe === 'daily' ? 1 : 12 }, refreshTrigger);
+  const { data: keywordVectors, isLoading: isVectorsLoading, error: vectorsError } = useKeywordVectorsQuery(projectId, { ...filters, windowMonths: 12 }, refreshTrigger);
   const { data: countryCollab, isLoading: isCollabLoading, error: collabError } = useCountryCollaborationQuery(projectId, filters, refreshTrigger);
   const { data: collabInsights, isLoading: isInsightsLoading, error: insightsError } = useCollaborationInsightsQuery(projectId, filters, refreshTrigger);
   const { data: topology, isLoading: isTopologyLoading, error: topologyError } = useNetworkTopologyQuery(projectId, filters, refreshTrigger);
@@ -60,8 +59,6 @@ const KeywordsNetworksPage = () => {
               <CoreClustersCard data={keywordVectors} />
               <KeywordTrendVectorsChart 
                 data={keywordVectors} 
-                timeframe={localTimeframe} 
-                onTimeframeChange={setLocalTimeframe} 
               />
             </div>
             

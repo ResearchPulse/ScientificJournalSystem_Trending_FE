@@ -306,7 +306,7 @@ const drawHorizontalBarChart = (doc, x, y, w, h, data) => {
   const barX = x + labelWidth + 5;
   const startY = y + 6;
 
-  items.forEach((item, i) => {
+  items.forEach((_, i) => {
     const by = startY + i * (barHeight + 3);
     const barW = (values[i] / maxVal) * barAreaWidth;
     const colorIdx = i % CHART_PALETTE.length;
