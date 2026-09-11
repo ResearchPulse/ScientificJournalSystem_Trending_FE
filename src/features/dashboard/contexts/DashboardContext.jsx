@@ -14,10 +14,9 @@ export const useDashboardContext = () => {
 export const DashboardProvider = ({ children, projectId }) => {
   const [filters, setFilters] = useState({
     timeframe: 'Last 5 Years',
-    domain: 'All Domains',
+    subject_area: 'All Areas',
     subject_category: 'All Categories',
-    sub_category: 'All Sub-categories',
-    region: 'Global Distribution'
+    zone: 'Global Distribution'
   });
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -34,10 +33,18 @@ export const DashboardProvider = ({ children, projectId }) => {
     }));
   };
 
+  const updateFilters = (newValues) => {
+    setFilters(prev => ({
+      ...prev,
+      ...newValues
+    }));
+  };
+
   const value = {
     projectId,
     filters,
     updateFilter,
+    updateFilters,
     refreshTrigger,
     refreshData,
     loading,

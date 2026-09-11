@@ -9,10 +9,17 @@ const mapFiltersToParams = (filters) => {
   if (!filters) return {};
   const queryParams = {};
   
-  if (filters.subject_category && filters.subject_category !== 'All Categories') {
-    queryParams.subject_area = filters.subject_category;
+  if (filters.subject_area && filters.subject_area !== 'All Areas') {
+    queryParams.subject_area = filters.subject_area;
   } else if (filters.domain && filters.domain !== 'All Domains') {
     queryParams.subject_area = filters.domain;
+  }
+  
+  if (filters.subject_category && filters.subject_category !== 'All Categories') {
+    queryParams.subject_category = filters.subject_category;
+    if (!queryParams.subject_area) {
+      queryParams.subject_area = filters.subject_category;
+    }
   }
   
   const currentYear = new Date().getFullYear() - 1;

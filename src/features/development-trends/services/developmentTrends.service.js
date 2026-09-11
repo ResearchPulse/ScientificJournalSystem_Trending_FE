@@ -13,9 +13,10 @@ export const fetchDevelopmentTrendsData = (projectId, filters = {}) => {
     params: {
       project_id: cleanProjectId,
       timeframe: filters?.timeframe,
-      domain: filters?.domain,
-      subject_category: filters?.subject_category,
-      region: filters?.region
+      subject_area: filters?.subject_area && filters.subject_area !== 'All Areas' ? filters.subject_area : undefined,
+      domain: filters?.subject_area && filters.subject_area !== 'All Areas' ? filters.subject_area : (filters?.domain && filters.domain !== 'All Domains' ? filters.domain : undefined),
+      subject_category: filters?.subject_category && filters.subject_category !== 'All Categories' ? filters.subject_category : undefined,
+      zone: filters?.zone && filters.zone !== 'Global Distribution' ? filters.zone : undefined
     }
   });
 };
