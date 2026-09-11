@@ -13,17 +13,26 @@ const TIMEFRAME_OPTIONS = [
   'Last 10 Years'
 ];
 
-const REGION_OPTIONS = [
-  'Global Distribution',
-  'North America',
-  'Europe',
-  'Asia-Pacific'
-];
-
 export default function DashboardFilters() {
   const { t } = useTranslation();
-  const { filters, updateFilter, refreshData, loading, projectId } = useDashboardContext();
-  const [categories, setCategories] = useState([]);
+  const { filters, updateFilter, updateFilters, refreshData, loading, projectId } = useDashboardContext();
+  const [hierarchy, setHierarchy] = useState([]);
+  const [zoneOptions, setZoneOptions] = useState(['Global Distribution']);
+
+  useEffect(() => {
+    const loadZones = async () => {
+      try {
+        const res = await apiClient.get('/analytics/zones');
+        const data = res?.data?.data || res?.data || res;
+        const regions = Array.isArray(data?.regions) ? data.regions.map(r => r.name) : [];
+        const countries = Array.isArray(data?.countries) ? data.countries.map(c => c.name) : [];
+        setZoneOptions(['Global Distribution', ...regions, ...countries]);
+      } catch (err) {
+        console.error('Failed to fetch zones:', err);
+      }
+    };
+    loadZones();
+  }, []);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -36,42 +45,61 @@ export default function DashboardFilters() {
       ? Number(rawProjectId)
       : undefined;
 
-    const loadCategories = async () => {
+    const loadSubjectAreasHierarchy = async () => {
       try {
-        const res = await apiClient.get(`/analytics/subject-categories`, {
+        const res = await apiClient.get('/analytics/subject-areas', {
           params: { project_id: cleanProjectId }
         });
-        if (res) {
-          let items = [];
-          if (Array.isArray(res.data)) {
-            items = res.data;
-          } else if (res.data && Array.isArray(res.data.items)) {
-            items = res.data.items;
-          } else if (Array.isArray(res.data?.data)) {
-            items = res.data.data;
-          } else if (Array.isArray(res.data?.data?.items)) {
-            items = res.data.data.items;
-          } else if (Array.isArray(res)) {
-            items = res;
-          } else if (Array.isArray(res.items)) {
-            items = res.items;
-          }
-
-          const mapped = items.map(item => ({
-            id: item.id || item.subject_category_id,
-            name: item.name || item.display_name
-          }));
-          setCategories(mapped);
-        } else {
-          setCategories([]);
-        }
+        const payload = res?.data?.data || res?.data || res;
+        const items = Array.isArray(payload?.items) ? payload.items : (Array.isArray(payload) ? payload : []);
+        setHierarchy(items);
       } catch (err) {
-        console.error('Failed to fetch project subject categories:', err);
-        setCategories([]);
+        console.error('Failed to fetch subject areas hierarchy:', err);
+        setHierarchy([]);
       }
     };
-    loadCategories();
+    loadSubjectAreasHierarchy();
   }, [projectId]);
+
+  // Compute Area options
+  const areaOptions = ['All Areas', ...hierarchy.map(h => h.name)];
+
+  // Compute dependent Category options based on selected Subject Area
+  const categoryOptions = React.useMemo(() => {
+    const selectedArea = filters.subject_area;
+    if (!selectedArea || selectedArea === 'All Areas') {
+      // Gather all unique categories across all areas
+      const catSet = new Set();
+      hierarchy.forEach(area => {
+        (area.categories || []).forEach(cat => {
+          if (cat?.name) catSet.add(cat.name);
+        });
+      });
+      return ['All Categories', ...Array.from(catSet).sort()];
+    }
+
+    const matchedArea = hierarchy.find(
+      a => a.name?.toLowerCase() === selectedArea.toLowerCase()
+    );
+    if (!matchedArea || !Array.isArray(matchedArea.categories)) {
+      return ['All Categories'];
+    }
+
+    return ['All Categories', ...matchedArea.categories.map(c => c.name)];
+  }, [hierarchy, filters.subject_area]);
+
+  // Handle Subject Area change: update area and automatically reset category
+  const handleAreaChange = (newArea) => {
+    if (updateFilters) {
+      updateFilters({
+        subject_area: newArea,
+        subject_category: 'All Categories'
+      });
+    } else {
+      updateFilter('subject_area', newArea);
+      updateFilter('subject_category', 'All Categories');
+    }
+  };
 
   const handleUpdate = () => {
     refreshData();
@@ -100,8 +128,19 @@ export default function DashboardFilters() {
           <div className="dashboard-filter-group">
             <FilterDropdown
               title={t('dashboard.filters.subjectArea', 'Subject Area')}
-              value={filters.subject_category}
-              options={['All Categories', ...(categories ? categories.map(c => c.name) : [])]}
+              value={filters.subject_area || 'All Areas'}
+              options={areaOptions}
+              onChange={handleAreaChange}
+              defaultValue="All Areas"
+              searchable={true}
+            />
+          </div>
+
+          <div className="dashboard-filter-group">
+            <FilterDropdown
+              title={t('dashboard.filters.subjectCategory', 'Subject Category')}
+              value={filters.subject_category || 'All Categories'}
+              options={categoryOptions}
               onChange={(val) => updateFilter('subject_category', val)}
               defaultValue="All Categories"
               searchable={true}
@@ -110,23 +149,12 @@ export default function DashboardFilters() {
 
           <div className="dashboard-filter-group">
             <FilterDropdown
-              title={t('dashboard.filters.subCategory', 'Sub-Category')}
-              value={filters.sub_category}
-              options={['All Sub-categories', 'Research', 'Development', 'Innovation', 'Analysis']}
-              onChange={(val) => updateFilter('sub_category', val)}
-              defaultValue="All Sub-categories"
-              searchable={true}
-            />
-          </div>
-
-          <div className="dashboard-filter-group">
-            <FilterDropdown
-              title={t('dashboard.filters.zone', 'Zone')}
-              value={filters.region}
-              options={REGION_OPTIONS}
-              onChange={(val) => updateFilter('region', val)}
+              title={t('dashboard.filters.zone', 'Zone / Region')}
+              value={filters.zone || 'Global Distribution'}
+              options={zoneOptions}
+              onChange={(val) => updateFilter('zone', val)}
               defaultValue="Global Distribution"
-              searchable={false}
+              searchable={true}
             />
           </div>
         </div>
@@ -148,16 +176,16 @@ export default function DashboardFilters() {
           <span className="chip-value">{t(`dashboard.filters.${filters.timeframe}`, filters.timeframe)}</span>
         </div>
         <div className="dashboard-chip">
+          <span className="chip-label">{t('dashboard.filters.subjectArea', 'Subject Area')}:</span>
+          <span className="chip-value">{filters.subject_area || 'All Areas'}</span>
+        </div>
+        <div className="dashboard-chip">
           <span className="chip-label">{t('dashboard.filters.subjectCategory', 'Subject Category')}:</span>
-          <span className="chip-value">{t(`dashboard.filters.${filters.subject_category}`, filters.subject_category)}</span>
+          <span className="chip-value">{t(`dashboard.filters.${filters.subject_category}`, filters.subject_category || 'All Categories')}</span>
         </div>
         <div className="dashboard-chip">
-          <span className="chip-label">{t('dashboard.filters.subCategory', 'Sub-Category')}:</span>
-          <span className="chip-value">{t(`dashboard.filters.${filters.sub_category}`, filters.sub_category)}</span>
-        </div>
-        <div className="dashboard-chip">
-          <span className="chip-label">{t('dashboard.filters.region', 'Region')}:</span>
-          <span className="chip-value">{t(`dashboard.filters.${filters.region}`, filters.region)}</span>
+          <span className="chip-label">{t('dashboard.filters.zone', 'Zone')}:</span>
+          <span className="chip-value">{filters.zone || 'Global Distribution'}</span>
         </div>
       </div>
     </div>

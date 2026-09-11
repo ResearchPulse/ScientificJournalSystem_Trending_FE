@@ -5,6 +5,7 @@ import { FiSearch, FiX } from 'react-icons/fi';
 import { useDashboardContext } from '../../dashboard/contexts/DashboardContext';
 import { useGeoDistribution } from '../hooks/useGeoDistribution';
 import { mapFiltersToQueryParams } from '../services/globalEcosystem.service';
+import apiClient from '../../../shared/api/axios';
 import LoadingSkeleton from '../../../shared/components/common/LoadingSkeleton';
 import InlineErrorState from '../../../shared/components/common/InlineErrorState';
 
@@ -75,6 +76,21 @@ const REVERSE_NAME_MAP = Object.entries(NAME_MAP).reduce((acc, [code, name]) => 
   return acc;
 }, {});
 
+// Register country aliases
+REVERSE_NAME_MAP['United States'] = 'US';
+REVERSE_NAME_MAP['United States of America'] = 'US';
+REVERSE_NAME_MAP['USA'] = 'US';
+REVERSE_NAME_MAP['South Korea'] = 'KR';
+REVERSE_NAME_MAP['Korea'] = 'KR';
+REVERSE_NAME_MAP['Russian Federation'] = 'RU';
+REVERSE_NAME_MAP['Russia'] = 'RU';
+REVERSE_NAME_MAP['Viet Nam'] = 'VN';
+REVERSE_NAME_MAP['Vietnam'] = 'VN';
+REVERSE_NAME_MAP['United Arab Emirates'] = 'AE';
+REVERSE_NAME_MAP['UAE'] = 'AE';
+REVERSE_NAME_MAP['United Kingdom'] = 'GB';
+REVERSE_NAME_MAP['UK'] = 'GB';
+
 const INTENSITY_COLORS = {
   PEAK: '#EA580C',
   HIGH: '#F97316',
@@ -99,8 +115,21 @@ export default function GlobalHeatMapSection({
   const { t } = useTranslation();
   const [selectedCountryName, setSelectedCountryName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [availableCountries, setAvailableCountries] = useState([]);
+  const [allZones, setAllZones] = useState({ regions: [], countries: [] });
   const { projectId, filters, refreshTrigger, refreshData } = useDashboardContext();
+
+  // Load all system zones/countries for complete dropdown selection
+  useEffect(() => {
+    let isMounted = true;
+    apiClient.get('/analytics/zones')
+      .then(res => {
+        if (!isMounted) return;
+        const data = res?.data?.data || res?.data || { regions: [], countries: [] };
+        setAllZones(data);
+      })
+      .catch(err => console.error('Failed to fetch zones for heatmap:', err));
+    return () => { isMounted = false; };
+  }, []);
 
   const queryParams = mapFiltersToQueryParams(filters);
   const regionalQueryParams = useMemo(() => ({
@@ -112,60 +141,114 @@ export default function GlobalHeatMapSection({
   const { data: regionalData, isFetching: isRegionalLoading } = useGeoDistribution(
     projectId,
     regionalQueryParams,
-    refreshTrigger
+    refreshTrigger,
+    { enabled: Boolean(selectedCountryCode) }
   );
 
   // When selected country code is active, regional data is passed via props 'data'
   const isRegionMode = Boolean(selectedCountryCode);
 
-  // Parse global distribution list. This always uses mapData so clicking a country
-  // only updates the detail box, not the whole map coloring/layout.
+  // Sync selected country code when filters.zone changes
+  useEffect(() => {
+    if (!filters.zone || filters.zone === 'Global Distribution') {
+      onCountryChange('');
+      return;
+    }
+
+    const normalized = String(filters.zone).trim();
+    let foundCode = REVERSE_NAME_MAP[normalized];
+
+    if (!foundCode && Array.isArray(allZones?.countries)) {
+      const match = allZones.countries.find(
+        c => c.name.toLowerCase() === normalized.toLowerCase() || c.code.toLowerCase() === normalized.toLowerCase()
+      );
+      if (match) foundCode = match.code;
+    }
+
+    if (!foundCode && normalized.length === 2) {
+      foundCode = normalized.toUpperCase();
+    }
+
+    if (foundCode) {
+      onCountryChange(foundCode);
+    } else {
+      // If zone is a Region (e.g. 'Western Europe'), clear specific country so regional view is shown
+      onCountryChange('');
+    }
+  }, [filters.zone, allZones]);
+
+  // Parse global distribution list
   const heatMapData = useMemo(() => {
     if (!mapData) return {};
     return mapData.reduce((acc, item) => {
       const code = item.countryCode || item.country;
-      const name = NAME_MAP[code] || code;
-      acc[name] = {
+      const name = NAME_MAP[code] || item.countryName || code;
+      const dataObj = {
         intensity: item.intensity,
         count: item.count,
         intensityLabel: item.intensityLabel
       };
+      if (name) acc[name] = dataObj;
+      if (code) acc[code] = dataObj;
       return acc;
     }, {});
   }, [mapData]);
 
-  // Extract unique country options with data for the dropdown selector
-  useEffect(() => {
-    if (mapData && mapData.length > 0) {
-      const mapped = mapData.map(item => {
-        const code = item.countryCode || item.country;
-        return { code, name: NAME_MAP[code] || code };
-      }).filter(c => c.code);
-      const unique = Array.from(new Map(mapped.map(item => [item.code, item])).values());
-      unique.sort((a, b) => a.name.localeCompare(b.name));
-      setAvailableCountries(unique);
+  // Extract comprehensive country options for dropdown selector
+  const availableCountries = useMemo(() => {
+    const list = [];
+    const seen = new Set();
+
+    if (Array.isArray(allZones?.countries)) {
+      for (const c of allZones.countries) {
+        if (!seen.has(c.code)) {
+          seen.add(c.code);
+          list.push({ code: c.code, name: c.name || NAME_MAP[c.code] || c.code });
+        }
+      }
     }
-  }, [mapData]);
+
+    if (Array.isArray(mapData)) {
+      for (const item of mapData) {
+        const code = item.countryCode || item.country;
+        if (code && !seen.has(code)) {
+          seen.add(code);
+          list.push({ code, name: NAME_MAP[code] || item.countryName || code });
+        }
+      }
+    }
+
+    for (const [code, name] of Object.entries(NAME_MAP)) {
+      if (!seen.has(code)) {
+        seen.add(code);
+        list.push({ code, name });
+      }
+    }
+
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    return list;
+  }, [allZones, mapData]);
 
   // Sync state with parent country code parameter
   useEffect(() => {
     if (selectedCountryCode) {
-      const name = NAME_MAP[selectedCountryCode] || selectedCountryCode;
+      const match = availableCountries.find(c => c.code === selectedCountryCode);
+      const name = match?.name || NAME_MAP[selectedCountryCode] || selectedCountryCode;
       setSelectedCountryName(name);
       setSearchQuery(name);
     } else {
       setSelectedCountryName('');
       setSearchQuery('');
     }
-  }, [selectedCountryCode]);
+  }, [selectedCountryCode, availableCountries]);
 
   const getFillColor = (geoName) => {
     const code = REVERSE_NAME_MAP[geoName];
-    if (selectedCountryCode && code === selectedCountryCode) {
+    if (selectedCountryCode && (code === selectedCountryCode || geoName === selectedCountryName)) {
       return '#EA580C'; // Highlight selected country
     }
-    const item = heatMapData[geoName];
-    if (!item?.intensity) return '#444F5D'; // Dark slate blue/gray for countries without data
+    const item = heatMapData[geoName] || (code && heatMapData[code]);
+    if (!item?.intensity || !item?.count) return '#444F5D'; // Dark slate blue/gray for countries without data
     return getIntensityColor(item.intensity);
   };
 
