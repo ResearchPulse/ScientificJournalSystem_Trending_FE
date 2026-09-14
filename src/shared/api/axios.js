@@ -56,21 +56,21 @@ apiClient.interceptors.response.use(
       return new Promise((resolve, reject) => {
         (async () => {
           try {
-            // Call refresh API
-            await axios.get(`${API_BASE_URL}/api/v1/auth/refresh`, {
+            // Call refresh API on Core BE (port 8000)
+            const coreBaseUrl = import.meta.env.VITE_API_CORE_URL || 'http://localhost:8000';
+            await axios.get(`${coreBaseUrl}/auth/refresh`, {
               withCredentials: true,
             });
 
             // If success, backend automatically sets new access_token cookie.
-            // We don't need to manually extract it or set it in headers.
-            useAuthStore.getState().loginSuccess(null); // Just update auth state to logged in if needed
+            useAuthStore.getState().loginSuccess(null);
 
             processQueue(null);
             resolve(apiClient(originalRequest));
           } catch (refreshError) {
-            processQueue(refreshError);
+            processQueue(error);
             useAuthStore.getState().logout();
-            reject(refreshError);
+            reject(error);
           } finally {
             isRefreshing = false;
           }
