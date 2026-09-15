@@ -77,6 +77,26 @@ const chatbotApi = {
       params,
     });
   },
+
+  /**
+   * Xóa toàn bộ lịch sử cuộc trò chuyện của project hiện tại
+   *
+   * @param {number|string} projectId
+   * @returns {Promise<{ success: boolean, deleted_count: number }>}
+   */
+  clearChatHistory: async (projectId) => {
+    return await apiClient.delete(`/api/v1/projects/${projectId}/chat/messages`);
+  },
+
+  /**
+   * Tạo mới phiên trò chuyện (reset working memory bên RAG AI)
+   *
+   * @param {number|string} projectId
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  resetConversation: async (projectId) => {
+    return await apiClient.post(`/api/v1/projects/${projectId}/chat/reset`);
+  },
 };
 
 export default chatbotApi;
