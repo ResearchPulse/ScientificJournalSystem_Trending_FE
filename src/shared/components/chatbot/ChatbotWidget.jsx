@@ -9,7 +9,7 @@ import remarkGfm from 'remark-gfm';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import { FaPaperPlane, FaExpand } from 'react-icons/fa';
+import { FaPaperPlane, FaExpand, FaPlus, FaTrashAlt } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import chatbotApi from '../../services/chatbotApi';
 import './ChatbotWidget.css';
@@ -101,11 +101,59 @@ export default function ChatbotWidget() {
   const [message, setMessage] = useState('');
   const [projectId, setProjectId] = useState(() => getProjectIdFromUrl());
   const [isLoading, setIsLoading] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
   const [messages, setMessages] = useState([initialAssistantMessage]);
   const [loadedProjectId, setLoadedProjectId] = useState(null);
   const [activeModalTable, setActiveModalTable] = useState(null);
   const [activeModalMarkdownTable, setActiveModalMarkdownTable] = useState(null);
   const scrollAnchorRef = useRef(null);
+
+  const showToast = (text) => {
+    setToastMessage(text);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
+  const handleNewChat = async () => {
+    if (isLoading || isClearing || isResetting) return;
+    setIsResetting(true);
+    setMessages([initialAssistantMessage]);
+    setMessage('');
+    try {
+      if (projectId) {
+        await chatbotApi.resetConversation(projectId);
+      }
+      showToast(t('chatbot.newChatSuccess', 'Đã bắt đầu cuộc trò chuyện mới.'));
+    } catch (err) {
+      console.warn('Lỗi khi reset phiên hội thoại:', err);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  const handleConfirmClearHistory = async () => {
+    if (!projectId || isClearing) return;
+    setIsClearing(true);
+    try {
+      await chatbotApi.clearChatHistory(projectId);
+      queryClient.setQueryData(['chat-history', projectId, CHAT_HISTORY_LIMIT], { data: [] });
+      queryClient.invalidateQueries({
+        queryKey: ['chat-history', projectId, CHAT_HISTORY_LIMIT],
+      });
+      setMessages([initialAssistantMessage]);
+      setShowClearConfirm(false);
+      showToast(t('chatbot.clearChatSuccess', 'Đã xóa toàn bộ lịch sử cuộc trò chuyện.'));
+    } catch (err) {
+      console.error('Lỗi khi xóa lịch sử chat:', err);
+      alert(t('chatbot.clearChatError', 'Không thể xóa lịch sử: ') + (err.message || err));
+    } finally {
+      setIsClearing(false);
+    }
+  };
 
   const suggestedPrompts = [
     t('chatbot.suggestedPrompt1', 'Tìm giúp tôi top các bài báo trong dự án này'),
@@ -293,15 +341,39 @@ export default function ChatbotWidget() {
                 <h2>{t('chatbot.title', 'AI Research Assistant')}</h2>
               </div>
             </div>
-            <button
-              id="chatbot-close-button"
-              className="rp-chatbot__icon-btn"
-              type="button"
-              onClick={() => setIsOpen(false)}
-              aria-label={t('chatbot.close', 'Close chatbot')}
-            >
-              <IoMdClose size={20} />
-            </button>
+            <div className="rp-chatbot__header-actions">
+              <button
+                id="chatbot-new-chat-button"
+                className="rp-chatbot__icon-btn"
+                type="button"
+                onClick={handleNewChat}
+                title={t('chatbot.newChat', 'Tạo mới cuộc trò chuyện')}
+                disabled={isLoading || isClearing || isResetting}
+                aria-label={t('chatbot.newChat', 'Tạo mới cuộc trò chuyện')}
+              >
+                <FaPlus size={13} />
+              </button>
+              <button
+                id="chatbot-clear-history-button"
+                className="rp-chatbot__icon-btn rp-chatbot__icon-btn--danger"
+                type="button"
+                onClick={() => setShowClearConfirm(true)}
+                title={t('chatbot.clearChat', 'Xóa cuộc trò chuyện')}
+                disabled={isLoading || isClearing || isResetting}
+                aria-label={t('chatbot.clearChat', 'Xóa cuộc trò chuyện')}
+              >
+                <FaTrashAlt size={13} />
+              </button>
+              <button
+                id="chatbot-close-button"
+                className="rp-chatbot__icon-btn"
+                type="button"
+                onClick={() => setIsOpen(false)}
+                aria-label={t('chatbot.close', 'Close chatbot')}
+              >
+                <IoMdClose size={20} />
+              </button>
+            </div>
           </header>
 
           <div className="rp-chatbot__messages">
@@ -438,6 +510,47 @@ export default function ChatbotWidget() {
               <FaPaperPlane />
             </button>
           </form>
+
+          {toastMessage && (
+            <div className="rp-chatbot__toast" role="status">
+              <span>{toastMessage}</span>
+            </div>
+          )}
+
+          {showClearConfirm && (
+            <div className="rp-chatbot__confirm-overlay" role="dialog" aria-modal="true">
+              <div className="rp-chatbot__confirm-card">
+                <div className="rp-chatbot__confirm-icon">
+                  <FaTrashAlt size={20} />
+                </div>
+                <h4>{t('chatbot.confirmClearTitle', 'Xóa cuộc trò chuyện?')}</h4>
+                <p>
+                  {t(
+                    'chatbot.confirmClearDesc',
+                    'Toàn bộ tin nhắn trò chuyện của dự án này sẽ bị xóa và bộ nhớ ngữ cảnh của AI sẽ được làm mới.'
+                  )}
+                </p>
+                <div className="rp-chatbot__confirm-actions">
+                  <button
+                    type="button"
+                    className="rp-chatbot__btn rp-chatbot__btn--cancel"
+                    onClick={() => setShowClearConfirm(false)}
+                    disabled={isClearing}
+                  >
+                    {t('common.cancel', 'Hủy')}
+                  </button>
+                  <button
+                    type="button"
+                    className="rp-chatbot__btn rp-chatbot__btn--danger"
+                    onClick={handleConfirmClearHistory}
+                    disabled={isClearing}
+                  >
+                    {isClearing ? t('chatbot.clearing', 'Đang xóa...') : t('chatbot.delete', 'Xóa vĩnh viễn')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
