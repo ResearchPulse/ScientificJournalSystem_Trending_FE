@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { sidebarConfig } from './sidebar.config';
 import { useUserProfileQuery } from '../../hooks/useUserProfile';
+import { useAuthStore } from '../../store/useAuthStore';
+import { logoutSession } from '../../services/authService';
 import { generateProfessionalReport } from '../../utils/pdfExport';
 import './Sidebar.css';
 
@@ -14,21 +16,34 @@ const SidebarFooter = ({ collapsed }) => {
   const { lang, id } = useParams();
   const currentLang = lang || 'en';
 
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authUser = useAuthStore((state) => state.user);
   const { data: userProfile } = useUserProfileQuery();
-  const rawRole = userProfile?.displayRole || sidebarConfig.userProfile.role;
-  const translationKey = `role.${rawRole.toLowerCase().replace(/\s+/g, '')}`;
+
+  const activeUser = userProfile || authUser;
+  const rawRole = activeUser?.displayRole || activeUser?.role || (isAuthenticated ? 'Researcher' : 'Guest');
+  const translationKey = `role.${String(rawRole).toLowerCase().replace(/\s+/g, '')}`;
+
   const profile = {
-    initials: userProfile?.initials || sidebarConfig.userProfile.initials,
-    name: userProfile?.displayName || sidebarConfig.userProfile.name,
+    initials: activeUser?.initials || (isAuthenticated ? 'RP' : 'G'),
+    name: activeUser?.displayName || (activeUser?.first_name ? `${activeUser.first_name} ${activeUser.last_name || ''}`.trim() : null) || (isAuthenticated ? 'Researcher' : t('common.guest', 'Guest')),
     role: t(translationKey, rawRole),
-    avatar: userProfile?.avatar || null
+    avatar: activeUser?.avatar || null
   };
 
   // Handle footer action clicks dynamically based on action type
   const handleAction = (action) => {
     if (action === 'logout') {
-      // Redirect to home page
-      window.location.assign(import.meta.env.VITE_PAGE_BASE_URL || '/');
+      (async () => {
+        try {
+          await logoutSession();
+        } catch {
+          // ignore
+        }
+        queryClient.clear();
+        const baseUrl = import.meta.env.VITE_PAGE_BASE_URL || '/';
+        window.location.assign(baseUrl);
+      })();
     } else if (action === 'support') {
       navigate(`/${currentLang}/support`);
     } else if (action === 'export-pdf') {
